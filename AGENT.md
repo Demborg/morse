@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENT.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -20,7 +20,11 @@ A Bluetooth keyboard built from a vintage Morse code key (ESP32-C3), paired with
 
 ## Trainer App
 
-- **Framework:** Svelte PWA, mobile-first
-- **Audio:** 700Hz sine wave via Web Audio API
+- **Framework:** SvelteKit 5 with TypeScript, mobile-first
+- **Dev server:** `cd trainer && npm run dev`
+- **Build:** `cd trainer && npm run build`
+- **Audio:** 700Hz sine wave via Web Audio API (persistent oscillator toggled via GainNode)
 - **Input:** Listens to both touch events and keyboard Spacebar (for physical key input)
 - **Mechanic:** "Simon Says" rhythm game — app plays pattern, user mimics to advance
+- **Timing model:** 1 unit = 120ms. DIT = 1 unit, DAH = 3 units. DIT/DAH threshold = 2 units (240ms). End-of-input timeout = 6 units (720ms).
+- **Game state:** `idle → demo → listening → success/retry → demo` loop managed in `game.svelte.ts` using Svelte 5 runes (`$state`)
