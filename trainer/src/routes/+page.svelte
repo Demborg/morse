@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import {
 		getState,
 		getChar,
@@ -12,6 +13,8 @@
 	} from '$lib/game.svelte';
 	import { toneOn, toneOff } from '$lib/audio';
 
+	let touchTarget: HTMLDivElement;
+
 	function onPress(e: Event) {
 		e.preventDefault();
 		handlePressStart();
@@ -23,6 +26,15 @@
 		handlePressEnd();
 		toneOff();
 	}
+
+	onMount(() => {
+		touchTarget.addEventListener('touchstart', onPress, { passive: false });
+		touchTarget.addEventListener('touchend', onRelease, { passive: false });
+		return () => {
+			touchTarget.removeEventListener('touchstart', onPress);
+			touchTarget.removeEventListener('touchend', onRelease);
+		};
+	});
 
 	function onKeyDown(e: KeyboardEvent) {
 		if (e.repeat) return;
@@ -84,8 +96,7 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
 		class="touch-target"
-		ontouchstart={onPress}
-		ontouchend={onRelease}
+		bind:this={touchTarget}
 		onmousedown={onPress}
 		onmouseup={onRelease}
 		onclick={getState() === 'idle' ? start : undefined}
