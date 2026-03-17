@@ -17,8 +17,12 @@
 
 	function onPress(e: Event) {
 		e.preventDefault();
-		handlePressStart();
-		if (getState() === 'listening') toneOn();
+		if (getState() === 'idle') {
+			start();
+		} else {
+			handlePressStart();
+			if (getState() === 'listening') toneOn();
+		}
 	}
 
 	function onRelease(e: Event) {
@@ -99,7 +103,6 @@
 		bind:this={touchTarget}
 		onmousedown={onPress}
 		onmouseup={onRelease}
-		onclick={getState() === 'idle' ? start : undefined}
 	>
 		{#if getState() === 'idle'}
 			<span class="hint">Tap here or press Space</span>

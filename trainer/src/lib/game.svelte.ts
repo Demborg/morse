@@ -69,7 +69,9 @@ function evaluate() {
 }
 
 export async function start() {
+	if (state !== 'idle') return;
 	await resumeAudio();
+	if (state !== 'idle') return;
 	curriculumIndex = 0;
 	currentChar = CURRICULUM[0];
 	expectedPattern = MORSE_ALPHABET[currentChar];
