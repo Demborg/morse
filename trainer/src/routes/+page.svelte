@@ -80,18 +80,17 @@
 <svelte:window onkeydown={onKeyDown} onkeyup={onKeyUp} />
 
 <div class="app" class:flash={isToneActive()} class:success={getState() === 'success'} class:retry={getState() === 'retry'}>
-	<div class="main-content" class:centered={getMode() !== 'recognize' || getState() !== 'listening'}>
+	<div class="main-content">
 		<div class="display">
 			<div class="char">
 				{#if getState() === 'idle'}
 					·−
-				{:else if getMode() === 'recognize' && getState() === 'listening'}
+				{:else if getMode() === 'recognize' && (getState() === 'demo' || getState() === 'listening')}
 					?
 				{:else}
 					{getChar()}
 				{/if}
 			</div>
-
 			<div class="pattern">
 				{#if getState() !== 'idle' && getMode() !== 'recognize'}
 					{#each getPattern().split('') as symbol, i}
@@ -175,16 +174,12 @@
 	}
 
 	.main-content {
-		flex: 0 0 auto;
+		flex: 1;
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		z-index: 10;
 		pointer-events: none;
-	}
-
-	.main-content.centered {
-		flex: 1;
-		justify-content: center;
 	}
 
 	.display {
@@ -192,7 +187,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 4rem 1rem 2rem;
+		padding: 2rem 1rem;
 		gap: 0.5rem;
 	}
 
@@ -255,7 +250,7 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 1rem;
-		padding: 1rem 2rem 4rem;
+		padding: 1rem 2rem 2rem;
 		pointer-events: auto;
 	}
 
