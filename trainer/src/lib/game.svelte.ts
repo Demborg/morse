@@ -1,9 +1,10 @@
 import { MORSE_ALPHABET, CURRICULUM, morseToTimeline, END_TIMEOUT_MS, FARNSWORTH_GAP_MS } from './morse';
 import { resume as resumeAudio, playTone } from './audio';
 import { classifyPress } from './classifier';
+import { getRandomWord } from './words';
 
 export type GameState = 'idle' | 'demo' | 'listening' | 'success' | 'retry';
-export type GameMode = 'mimic' | 'recall' | 'recognize';
+export type GameMode = 'mimic' | 'recall' | 'recognize' | 'words';
 
 let state = $state<GameState>('idle');
 let mode = $state<GameMode>('mimic');
@@ -14,6 +15,8 @@ let userInput = $state<string[]>([]);
 let choices = $state<string[]>([]);
 let toneActive = $state(false);
 let demoElementIndex = $state(-1);
+let currentWord = $state('');
+let wordProgress = $state(0);
 
 let pressStart: number | null = null;
 let endTimer: ReturnType<typeof setTimeout> | null = null;
@@ -26,6 +29,8 @@ export function getUserInput() { return userInput; }
 export function getChoices() { return choices; }
 export function isToneActive() { return toneActive; }
 export function getDemoElementIndex() { return demoElementIndex; }
+export function getCurrentWord() { return currentWord; }
+export function getWordProgress() { return wordProgress; }
 
 export function setMode(newMode: GameMode) {
 	mode = newMode;
@@ -60,8 +65,8 @@ async function playDemo() {
 		generateChoices();
 	}
 
-	// In recall mode, we don't play the demo sound/pattern before
-	if (mode === 'recall') {
+	// In recall and words mode, we don't play the demo sound/pattern before
+	if (mode === 'recall' || mode === 'words') {
 		state = 'listening';
 		return;
 	}
@@ -88,26 +93,50 @@ async function playDemo() {
 
 function evaluate() {
 	const input = userInput.join('');
-	if (input === expectedPattern) {
-		handleSuccess();
+	if (mode === 'words') {
+		if (input === MORSE_ALPHABET[currentWord[wordProgress]]) {
+			wordProgress++;
+			userInput = [];
+			if (wordProgress >= currentWord.length) {
+				handleSuccess();
+			}
+		} else {
+			handleRetry();
+		}
 	} else {
-		handleRetry();
+		if (input === expectedPattern) {
+			handleSuccess();
+		} else {
+			handleRetry();
+		}
 	}
 }
 
 function handleSuccess() {
 	state = 'success';
 	setTimeout(() => {
-		curriculumIndex = Math.min(curriculumIndex + 1, CURRICULUM.length - 1);
-		currentChar = CURRICULUM[curriculumIndex];
-		expectedPattern = MORSE_ALPHABET[currentChar];
-		playDemo();
+		if (mode === 'words') {
+			currentWord = getRandomWord();
+			wordProgress = 0;
+			playDemo();
+		} else {
+			curriculumIndex = Math.min(curriculumIndex + 1, CURRICULUM.length - 1);
+			currentChar = CURRICULUM[curriculumIndex];
+			expectedPattern = MORSE_ALPHABET[currentChar];
+			playDemo();
+		}
 	}, 800);
 }
 
 function handleRetry() {
 	state = 'retry';
-	setTimeout(() => playDemo(), 800);
+	setTimeout(() => {
+		if (mode === 'words') {
+			wordProgress = 0;
+			userInput = [];
+		}
+		playDemo();
+	}, 800);
 }
 
 export function submitChoice(choice: string) {
@@ -122,15 +151,24 @@ export function submitChoice(choice: string) {
 function resetRound() {
 	userInput = [];
 	clearEndTimer();
+	if (mode === 'words') {
+		currentWord = getRandomWord();
+		wordProgress = 0;
+	}
 	playDemo();
 }
 
 export async function start() {
 	if (state !== 'idle') return;
 	await resumeAudio();
-	curriculumIndex = 0;
-	currentChar = CURRICULUM[0];
-	expectedPattern = MORSE_ALPHABET[currentChar];
+	if (mode === 'words') {
+		currentWord = getRandomWord();
+		wordProgress = 0;
+	} else {
+		curriculumIndex = 0;
+		currentChar = CURRICULUM[0];
+		expectedPattern = MORSE_ALPHABET[currentChar];
+	}
 	playDemo();
 }
 

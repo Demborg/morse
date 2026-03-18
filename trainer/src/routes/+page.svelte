@@ -13,9 +13,12 @@
 		getDemoElementIndex,
 		start,
 		handlePressStart,
-		handlePressEnd
+		handlePressEnd,
+		getCurrentWord,
+		getWordProgress
 	} from '$lib/game.svelte';
 	import { toneOn, toneOff } from '$lib/audio';
+	import { MORSE_ALPHABET } from '$lib/morse';
 
 	let touchTarget: HTMLDivElement;
 
@@ -69,7 +72,10 @@
 		switch (state) {
 			case 'idle': return 'Tap to start';
 			case 'demo': return 'Listen...';
-			case 'listening': return getMode() === 'recognize' ? 'Pick a letter' : 'Your turn';
+			case 'listening': 
+				if (getMode() === 'recognize') return 'Pick a letter';
+				if (getMode() === 'words') return 'Type the word';
+				return 'Your turn';
 			case 'success': return 'Correct';
 			case 'retry': return 'Try again';
 			default: return '';
@@ -87,22 +93,47 @@
 					·−
 				{:else if getMode() === 'recognize' && (getState() === 'demo' || getState() === 'listening')}
 					?
+				{:else if getMode() === 'words'}
+					<div class="word-display">
+						{#each getCurrentWord().split('') as letter, i}
+							<span
+								class="word-letter"
+								class:correct={i < getWordProgress()}
+								class:active={i === getWordProgress()}
+								class:pending={i > getWordProgress()}
+							>{letter}</span>
+						{/each}
+					</div>
 				{:else}
 					{getChar()}
 				{/if}
 			</div>
 			<div class="pattern">
 				{#if getState() !== 'idle' && getMode() !== 'recognize'}
-					{#each getPattern().split('') as symbol, i}
-						<span
-							class="symbol"
-							class:hidden={getMode() === 'recall' && getState() === 'listening'}
-							class:active={getState() === 'demo' && getDemoElementIndex() === i}
-							class:entered={getState() === 'listening' && i < getUserInput().length}
-							class:correct={getState() === 'listening' && i < getUserInput().length && getUserInput()[i] === symbol}
-							class:wrong={getState() === 'listening' && i < getUserInput().length && getUserInput()[i] !== symbol}
-						>{symbol === '.' ? '·' : '−'}</span>
-					{/each}
+					{#if getMode() === 'words'}
+						{#if getCurrentWord() && getWordProgress() < getCurrentWord().length}
+							{#each MORSE_ALPHABET[getCurrentWord()[getWordProgress()]].split('') as symbol, i}
+								<span
+									class="symbol"
+									class:hidden={getState() === 'listening'}
+									class:entered={getState() === 'listening' && i < getUserInput().length}
+									class:correct={getState() === 'listening' && i < getUserInput().length && getUserInput()[i] === symbol}
+									class:wrong={getState() === 'listening' && i < getUserInput().length && getUserInput()[i] !== symbol}
+								>{symbol === '.' ? '·' : '−'}</span>
+							{/each}
+						{/if}
+					{:else}
+						{#each getPattern().split('') as symbol, i}
+							<span
+								class="symbol"
+								class:hidden={getMode() === 'recall' && getState() === 'listening'}
+								class:active={getState() === 'demo' && getDemoElementIndex() === i}
+								class:entered={getState() === 'listening' && i < getUserInput().length}
+								class:correct={getState() === 'listening' && i < getUserInput().length && getUserInput()[i] === symbol}
+								class:wrong={getState() === 'listening' && i < getUserInput().length && getUserInput()[i] !== symbol}
+							>{symbol === '.' ? '·' : '−'}</span>
+						{/each}
+					{/if}
 				{/if}
 			</div>
 			<div class="status">{statusText(getState())}</div>
@@ -136,6 +167,7 @@
 			<button class:active={getMode() === 'mimic'} onclick={() => setMode('mimic')}>Mimic</button>
 			<button class:active={getMode() === 'recall'} onclick={() => setMode('recall')}>Recall</button>
 			<button class:active={getMode() === 'recognize'} onclick={() => setMode('recognize')}>Listen</button>
+			<button class:active={getMode() === 'words'} onclick={() => setMode('words')}>Words</button>
 		</div>
 	</div>
 </div>
@@ -244,6 +276,31 @@
 		margin-top: 0.5rem;
 		text-transform: uppercase;
 		letter-spacing: 0.1em;
+	}
+
+	.word-display {
+		display: flex;
+		gap: 0.2rem;
+	}
+
+	.word-letter {
+		color: #eee;
+		transition: color 100ms;
+	}
+
+	.word-letter.correct {
+		color: #6f6;
+	}
+
+	.word-letter.active {
+		color: #fff;
+		text-decoration: underline;
+		text-decoration-thickness: 4px;
+		text-underline-offset: 8px;
+	}
+
+	.word-letter.pending {
+		color: #555;
 	}
 
 	.choices {
