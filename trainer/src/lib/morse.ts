@@ -6,6 +6,9 @@ export const INTER_GAP_MS = UNIT_MS * 3;
 export const DIT_DAH_THRESHOLD_MS = UNIT_MS * 2;
 export const END_TIMEOUT_MS = INTER_GAP_MS * 2;
 
+export const FARNSWORTH_UNIT_MS = 80;
+export const FARNSWORTH_GAP_MS = 600;
+
 export const MORSE_ALPHABET: Record<string, string> = {
 	A: '.-',
 	B: '-...',
@@ -58,15 +61,19 @@ export const CURRICULUM = [
 
 export type TimelineEvent = { type: 'tone' | 'silence'; duration: number };
 
-export function morseToTimeline(pattern: string): TimelineEvent[] {
+export function morseToTimeline(pattern: string, useFarnsworth = false): TimelineEvent[] {
 	const events: TimelineEvent[] = [];
+	const dit = useFarnsworth ? FARNSWORTH_UNIT_MS : DIT_MS;
+	const dah = useFarnsworth ? FARNSWORTH_UNIT_MS * 3 : DAH_MS;
+	const gap = useFarnsworth ? FARNSWORTH_UNIT_MS : INTRA_GAP_MS;
+
 	for (let i = 0; i < pattern.length; i++) {
 		events.push({
 			type: 'tone',
-			duration: pattern[i] === '.' ? DIT_MS : DAH_MS
+			duration: pattern[i] === '.' ? dit : dah
 		});
 		if (i < pattern.length - 1) {
-			events.push({ type: 'silence', duration: INTRA_GAP_MS });
+			events.push({ type: 'silence', duration: gap });
 		}
 	}
 	return events;
