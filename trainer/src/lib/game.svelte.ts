@@ -2,13 +2,13 @@ import { MORSE_ALPHABET, CURRICULUM, morseToTimeline, END_TIMEOUT_MS, FARNSWORTH
 import { resume as resumeAudio, playTone } from './audio';
 import { classifyPress } from './classifier';
 import { getRandomWord } from './words';
+import * as srs from './srs.svelte';
 
 export type GameState = 'idle' | 'demo' | 'listening' | 'success' | 'retry';
 export type GameMode = 'mimic' | 'recall' | 'recognize' | 'words';
 
 let state = $state<GameState>('idle');
 let mode = $state<GameMode>('mimic');
-let curriculumIndex = $state(0);
 let currentChar = $state(CURRICULUM[0]);
 let expectedPattern = $state(MORSE_ALPHABET[CURRICULUM[0]]);
 let userInput = $state<string[]>([]);
@@ -17,6 +17,7 @@ let toneActive = $state(false);
 let demoElementIndex = $state(-1);
 let currentWord = $state('');
 let wordProgress = $state(0);
+let firstAttempt = $state(true);
 
 let pressStart: number | null = null;
 let endTimer: ReturnType<typeof setTimeout> | null = null;
@@ -114,15 +115,20 @@ function evaluate() {
 
 function handleSuccess() {
 	state = 'success';
+	if (mode !== 'words') {
+		if (firstAttempt) {
+			srs.recordSuccess(currentChar);
+		}
+	}
 	setTimeout(() => {
 		if (mode === 'words') {
 			currentWord = getRandomWord();
 			wordProgress = 0;
 			playDemo();
 		} else {
-			curriculumIndex = Math.min(curriculumIndex + 1, CURRICULUM.length - 1);
-			currentChar = CURRICULUM[curriculumIndex];
+			currentChar = srs.getNextChar();
 			expectedPattern = MORSE_ALPHABET[currentChar];
+			firstAttempt = true;
 			playDemo();
 		}
 	}, 800);
@@ -130,6 +136,10 @@ function handleSuccess() {
 
 function handleRetry() {
 	state = 'retry';
+	if (mode !== 'words') {
+		firstAttempt = false;
+		srs.recordFailure(currentChar);
+	}
 	setTimeout(() => {
 		if (mode === 'words') {
 			wordProgress = 0;
@@ -154,6 +164,8 @@ function resetRound() {
 	if (mode === 'words') {
 		currentWord = getRandomWord();
 		wordProgress = 0;
+	} else {
+		firstAttempt = true;
 	}
 	playDemo();
 }
@@ -161,13 +173,14 @@ function resetRound() {
 export async function start() {
 	if (state !== 'idle') return;
 	await resumeAudio();
+	srs.load();
 	if (mode === 'words') {
 		currentWord = getRandomWord();
 		wordProgress = 0;
 	} else {
-		curriculumIndex = 0;
-		currentChar = CURRICULUM[0];
+		currentChar = srs.getNextChar();
 		expectedPattern = MORSE_ALPHABET[currentChar];
+		firstAttempt = true;
 	}
 	playDemo();
 }
