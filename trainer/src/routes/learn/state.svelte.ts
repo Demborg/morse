@@ -1,17 +1,20 @@
-import { MORSE_ALPHABET, morseToTimeline, END_TIMEOUT_MS } from '$lib/morse';
+import { MORSE_ALPHABET, CURRICULUM, morseToTimeline, END_TIMEOUT_MS } from '$lib/morse';
 import { resume as resumeAudio, playTone, toneOn, toneOff } from '$lib/audio';
 import { classifyPress } from '$lib/classifier';
 import * as srs from '$lib/srs.svelte';
 import { shell } from '$lib/shell.svelte';
 import { onMorsePress, onMorseRelease } from '$lib/input.svelte';
 
+export type TaskType = 'mimic' | 'recall' | 'listen';
 export type State = 'idle' | 'demo' | 'listening' | 'success' | 'retry';
 
-export class MimicGame {
+export class TrainGame {
 	state = $state<State>('idle');
+	taskType = $state<TaskType>('mimic');
 	char = $state('A');
 	pattern = $derived(MORSE_ALPHABET[this.char] || '');
 	userInput = $state<string[]>([]);
+	choices = $state<string[]>([]);
 	demoElementIndex = $state(-1);
 	firstAttempt = $state(true);
 
@@ -44,18 +47,40 @@ export class MimicGame {
 		if (this.state !== 'idle') return;
 		await resumeAudio();
 		srs.load();
+		this.startRound();
+	}
+
+	startRound() {
 		this.char = srs.getNextChar();
+		const item = srs.getItem(this.char);
+		
+		if (item?.stage === 'learning') {
+			this.taskType = 'mimic';
+		} else {
+			this.taskType = Math.random() < 0.5 ? 'recall' : 'listen';
+		}
+
+		this.userInput = [];
 		this.firstAttempt = true;
-		this.playDemo();
+		this.clearTimers();
+
+		if (this.taskType === 'mimic' || this.taskType === 'listen') {
+			this.playDemo();
+		} else {
+			this.state = 'listening';
+		}
 	}
 
 	async playDemo() {
 		this.state = 'demo';
 		this.demoElementIndex = -1;
-		this.userInput = [];
 		this.clearTimers();
+		
+		if (this.taskType === 'listen') {
+			this.generateChoices();
+		}
 
-		const timeline = morseToTimeline(this.pattern, false);
+		const timeline = morseToTimeline(this.pattern);
 		let localStateChanged = false;
 		
 		for (let i = 0; i < timeline.length; i++) {
@@ -67,7 +92,7 @@ export class MimicGame {
 			if (event.type === 'tone') {
 				this.demoElementIndex = Math.floor(i / 2);
 				shell.flash = true;
-				await playTone(event.duration);
+				await playTone(event.duration, true);
 				shell.flash = false;
 			} else {
 				await new Promise(r => setTimeout(r, event.duration));
@@ -80,8 +105,23 @@ export class MimicGame {
 				if (this.state === 'demo') {
 					this.state = 'listening';
 				}
-			}, 400);
+			}, 600);
 		}
+	}
+
+	replay() {
+		if (this.state !== 'listening' || this.taskType === 'recall') return;
+		this.playDemo();
+	}
+
+	generateChoices() {
+		const set = new Set<string>();
+		set.add(this.char);
+		while (set.size < 4) {
+			const randomChar = CURRICULUM[Math.floor(Math.random() * CURRICULUM.length)];
+			set.add(randomChar);
+		}
+		this.choices = Array.from(set).sort(() => Math.random() - 0.5);
 	}
 
 	handlePressStart() {
@@ -89,7 +129,7 @@ export class MimicGame {
 			this.start();
 			return;
 		}
-		if (this.state !== 'listening') return;
+		if (this.state !== 'listening' || this.taskType === 'listen') return;
 		
 		if (this.endTimer) clearTimeout(this.endTimer);
 		this.pressStart = performance.now();
@@ -98,7 +138,7 @@ export class MimicGame {
 	}
 
 	handlePressEnd() {
-		if (this.state !== 'listening' || this.pressStart === null) {
+		if (this.state !== 'listening' || this.taskType === 'listen' || this.pressStart === null) {
 			shell.flash = false;
 			toneOff();
 			return;
@@ -116,8 +156,18 @@ export class MimicGame {
 		this.endTimer = setTimeout(() => this.evaluate(), END_TIMEOUT_MS);
 	}
 
+	submitChoice(choice: string) {
+		if (this.state !== 'listening' || this.taskType !== 'listen') return;
+		
+		if (choice === this.char) {
+			this.handleSuccess();
+		} else {
+			this.handleRetry();
+		}
+	}
+
 	evaluate() {
-		if (this.state !== 'listening') return;
+		if (this.state !== 'listening' || this.taskType === 'listen') return;
 		
 		const input = this.userInput.join('');
 		if (input === this.pattern) {
@@ -137,9 +187,7 @@ export class MimicGame {
 
 		this.stateTimer = setTimeout(() => {
 			shell.success = false;
-			this.char = srs.getNextChar();
-			this.firstAttempt = true;
-			this.playDemo();
+			this.startRound();
 		}, 800);
 	}
 
@@ -153,7 +201,11 @@ export class MimicGame {
 		this.stateTimer = setTimeout(() => {
 			shell.retry = false;
 			this.userInput = [];
-			this.playDemo();
+			if (this.taskType === 'mimic' || this.taskType === 'listen') {
+				this.playDemo();
+			} else {
+				this.state = 'listening';
+			}
 		}, 800);
 	}
 
@@ -161,9 +213,11 @@ export class MimicGame {
 		switch (this.state) {
 			case 'idle': return 'Tap to start';
 			case 'demo': return 'Listen...';
-			case 'listening': return 'Your turn';
 			case 'success': return 'Correct';
 			case 'retry': return 'Try again';
+			case 'listening': 
+				if (this.taskType === 'listen') return 'Pick a letter';
+				return 'Your turn';
 			default: return '';
 		}
 	}

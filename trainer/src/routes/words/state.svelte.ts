@@ -1,6 +1,7 @@
 import { MORSE_ALPHABET, END_TIMEOUT_MS } from '$lib/morse';
 import { resume as resumeAudio, toneOn, toneOff } from '$lib/audio';
 import { classifyPress } from '$lib/classifier';
+import * as srs from '$lib/srs.svelte';
 import { shell } from '$lib/shell.svelte';
 import { onMorsePress, onMorseRelease } from '$lib/input.svelte';
 import { getRandomWord } from '$lib/words';
@@ -50,7 +51,8 @@ export class WordsGame {
 	async start() {
 		if (this.state !== 'idle') return;
 		await resumeAudio();
-		this.currentWord = getRandomWord();
+		srs.load();
+		this.currentWord = getRandomWord(srs.getPool());
 		this.wordProgress = 0;
 		this.startRound();
 	}
@@ -120,7 +122,7 @@ export class WordsGame {
 
 		this.stateTimer = setTimeout(() => {
 			shell.success = false;
-			this.currentWord = getRandomWord();
+			this.currentWord = getRandomWord(srs.getPool());
 			this.wordProgress = 0;
 			this.startRound();
 		}, 800);

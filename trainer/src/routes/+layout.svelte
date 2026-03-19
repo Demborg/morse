@@ -21,9 +21,7 @@
 
 	<div class="footer">
 		<div class="modes">
-			<a class:active={page.url.pathname === '/mimic' || page.url.pathname === '/'} href="/mimic">Mimic</a>
-			<a class:active={page.url.pathname === '/recall'} href="/recall">Recall</a>
-			<a class:active={page.url.pathname === '/recognize'} href="/recognize">Listen</a>
+			<a class:active={page.url.pathname === '/learn' || page.url.pathname === '/'} href="/learn">Learn</a>
 			<a class:active={page.url.pathname === '/words'} href="/words">Words</a>
 		</div>
 	</div>
