@@ -1,10 +1,16 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
+	import { base } from '$app/paths';
 	import { handleKeyDown, handleKeyUp } from '$lib/input.svelte';
 	import { shell } from '$lib/shell.svelte';
 	
 	let { children } = $props();
+
+	function isActive(path: string) {
+		const fullPath = base + path;
+		return page.url.pathname === fullPath || (path === '/learn' && page.url.pathname === base + '/');
+	}
 </script>
 
 <svelte:head>
@@ -21,8 +27,8 @@
 
 	<div class="footer">
 		<div class="modes">
-			<a class:active={page.url.pathname === '/learn' || page.url.pathname === '/'} href="/learn">Learn</a>
-			<a class:active={page.url.pathname === '/words'} href="/words">Words</a>
+			<a class:active={isActive('/learn')} href="{base}/learn">Learn</a>
+			<a class:active={isActive('/words')} href="{base}/words">Words</a>
 		</div>
 	</div>
 </div>
