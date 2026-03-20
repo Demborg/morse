@@ -31,19 +31,17 @@
 			·−
 		{/if}
 	</div>
-	<div class="pattern">
-		{#if showPattern}
-			{#each pattern.split('') as symbol, i}
-				<span
-					class="symbol"
-					class:hidden={hideUnenteredPattern}
-					class:active={demoElementIndex === i}
-					class:entered={i < userInput.length}
-					class:correct={i < userInput.length && userInput[i] === symbol}
-					class:wrong={i < userInput.length && userInput[i] !== symbol}
-				>{symbol === '.' ? '·' : '−'}</span>
-			{/each}
-		{/if}
+	<div class="pattern" style:visibility={showPattern ? 'visible' : 'hidden'}>
+		{#each pattern.split('') as symbol, i}
+			<span
+				class="symbol"
+				class:hidden={hideUnenteredPattern}
+				class:active={demoElementIndex === i}
+				class:entered={i < userInput.length}
+				class:correct={i < userInput.length && userInput[i] === symbol}
+				class:wrong={i < userInput.length && userInput[i] !== symbol}
+			>{symbol === '.' ? '·' : '−'}</span>
+		{/each}
 	</div>
 	<div class="status">{statusText}</div>
 </div>

@@ -30,7 +30,7 @@ export class TrainGame {
 	}
 
 	unmount() {
-		this.cleanup.forEach(cb => cb());
+		this.cleanup.forEach((cb) => cb());
 		this.clearTimers();
 		toneOff();
 		shell.flash = false;
@@ -51,14 +51,9 @@ export class TrainGame {
 	}
 
 	startRound() {
-		this.char = srs.getNextChar();
-		const item = srs.getItem(this.char);
-		
-		if (item?.stage === 'learning') {
-			this.taskType = 'mimic';
-		} else {
-			this.taskType = Math.random() < 0.5 ? 'recall' : 'listen';
-		}
+		const next = srs.getNextTask();
+		this.char = next.char;
+		this.taskType = next.task;
 
 		this.userInput = [];
 		this.firstAttempt = true;
@@ -75,14 +70,14 @@ export class TrainGame {
 		this.state = 'demo';
 		this.demoElementIndex = -1;
 		this.clearTimers();
-		
+
 		if (this.taskType === 'listen') {
 			this.generateChoices();
 		}
 
 		const timeline = morseToTimeline(this.pattern);
 		let localStateChanged = false;
-		
+
 		for (let i = 0; i < timeline.length; i++) {
 			if (this.state !== 'demo') {
 				localStateChanged = true;
@@ -92,10 +87,10 @@ export class TrainGame {
 			if (event.type === 'tone') {
 				this.demoElementIndex = Math.floor(i / 2);
 				shell.flash = true;
-				await playTone(event.duration, true);
+				await playTone(event.duration);
 				shell.flash = false;
 			} else {
-				await new Promise(r => setTimeout(r, event.duration));
+				await new Promise((r) => setTimeout(r, event.duration));
 			}
 		}
 
@@ -117,6 +112,15 @@ export class TrainGame {
 	generateChoices() {
 		const set = new Set<string>();
 		set.add(this.char);
+		
+		// Try to fill from active set first
+		const pool = srs.getPool();
+		const shuffledPool = pool.sort(() => Math.random() - 0.5);
+		for (const c of shuffledPool) {
+			if (set.size < 4) set.add(c);
+		}
+
+		// Then fill with random from curriculum
 		while (set.size < 4) {
 			const randomChar = CURRICULUM[Math.floor(Math.random() * CURRICULUM.length)];
 			set.add(randomChar);
@@ -130,7 +134,7 @@ export class TrainGame {
 			return;
 		}
 		if (this.state !== 'listening' || this.taskType === 'listen') return;
-		
+
 		if (this.endTimer) clearTimeout(this.endTimer);
 		this.pressStart = performance.now();
 		shell.flash = true;
@@ -143,7 +147,7 @@ export class TrainGame {
 			toneOff();
 			return;
 		}
-		
+
 		const duration = performance.now() - this.pressStart;
 		this.pressStart = null;
 		shell.flash = false;
@@ -158,7 +162,7 @@ export class TrainGame {
 
 	submitChoice(choice: string) {
 		if (this.state !== 'listening' || this.taskType !== 'listen') return;
-		
+
 		if (choice === this.char) {
 			this.handleSuccess();
 		} else {
@@ -168,7 +172,7 @@ export class TrainGame {
 
 	evaluate() {
 		if (this.state !== 'listening' || this.taskType === 'listen') return;
-		
+
 		const input = this.userInput.join('');
 		if (input === this.pattern) {
 			this.handleSuccess();
@@ -180,9 +184,9 @@ export class TrainGame {
 	handleSuccess() {
 		this.state = 'success';
 		shell.success = true;
-		
+
 		if (this.firstAttempt) {
-			srs.recordSuccess(this.char);
+			srs.recordSuccess(this.char, this.taskType);
 		}
 
 		this.stateTimer = setTimeout(() => {
@@ -194,31 +198,38 @@ export class TrainGame {
 	handleRetry() {
 		this.state = 'retry';
 		shell.retry = true;
-		
+
 		this.firstAttempt = false;
 		srs.recordFailure(this.char);
 
 		this.stateTimer = setTimeout(() => {
 			shell.retry = false;
-			this.userInput = [];
-			if (this.taskType === 'mimic' || this.taskType === 'listen') {
-				this.playDemo();
-			} else {
+			if (this.taskType === 'mimic') {
+				// Repeat the same mimic task until success
+				this.userInput = [];
 				this.state = 'listening';
+			} else {
+				// For listen/recall, move on (they will be re-presented via repeatPile as mimic later)
+				this.startRound();
 			}
 		}, 800);
 	}
 
 	get statusText() {
 		switch (this.state) {
-			case 'idle': return 'Tap to start';
-			case 'demo': return 'Listen...';
-			case 'success': return 'Correct';
-			case 'retry': return 'Try again';
-			case 'listening': 
+			case 'idle':
+				return 'Tap to start';
+			case 'demo':
+				return 'Listen...';
+			case 'success':
+				return 'Correct';
+			case 'retry':
+				return 'Try again';
+			case 'listening':
 				if (this.taskType === 'listen') return 'Pick a letter';
 				return 'Your turn';
-			default: return '';
+			default:
+				return '';
 		}
 	}
 }

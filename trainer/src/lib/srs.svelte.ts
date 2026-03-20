@@ -1,124 +1,109 @@
 import { CURRICULUM } from './morse';
 
-const STORAGE_KEY = 'morse_srs_session';
-const TARGET_SCORE = 3;
-const INITIAL_POOL_SIZE = 3;
-
-export type Stage = 'learning' | 'testing';
+export type TaskType = 'mimic' | 'recall' | 'listen';
 
 interface SRSItem {
 	char: string;
-	stage: Stage;
 	score: number;
 }
 
-interface SRSState {
-	unlearned: string[];
-	pool: SRSItem[];
-}
-
 let unlearned = $state<string[]>([]);
-let pool = $state<SRSItem[]>([]);
+let activeSet = $state<SRSItem[]>([]);
+let repeatPile = $state<string[]>([]);
 let lastChar = $state<string | null>(null);
+let pendingNewLetter = $state(false);
 
 export function load() {
-	if (typeof sessionStorage === 'undefined') return;
-
-	const stored = sessionStorage.getItem(STORAGE_KEY);
-	if (stored) {
-		try {
-			const parsed = JSON.parse(stored) as SRSState;
-			unlearned = parsed.unlearned || [];
-			pool = parsed.pool || [];
-			
-			if (pool.length > 0 || unlearned.length > 0) {
-				return;
-			}
-		} catch (e) {
-			console.error('Failed to parse SRS state', e);
-		}
-	}
-
-	// Initialize new state: Copy CURRICULUM (already ordered by difficulty)
-	unlearned = [...CURRICULUM].reverse(); // Reverse so we can pop from the end
-	pool = [];
-
-	for (let i = 0; i < INITIAL_POOL_SIZE && unlearned.length > 0; i++) {
-		const char = unlearned.pop()!;
-		pool.push({ char, stage: 'learning', score: 0 });
-	}
+	// Reset state for new session (no persistence)
+	// Randomize the order of the curriculum
+	unlearned = [...CURRICULUM].sort(() => Math.random() - 0.5);
+	activeSet = [];
+	repeatPile = [];
+	lastChar = null;
 	
-	save();
-}
-
-function save() {
-	if (typeof sessionStorage === 'undefined') return;
-	const state: SRSState = {
-		unlearned: $state.snapshot(unlearned),
-		pool: $state.snapshot(pool)
-	};
-	sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-export function recordSuccess(char: string) {
-	const item = pool.find(i => i.char === char);
-	if (!item) return;
-
-	if (item.stage === 'learning') {
-		item.stage = 'testing';
-	} else {
-		item.score++;
+	// Start by introducing the first letter
+	if (unlearned.length > 0) {
+		repeatPile.push(unlearned.shift()!);
 	}
+	pendingNewLetter = false;
+}
 
-	if (item.score >= TARGET_SCORE) {
-		pool = pool.filter((i) => i.char !== char);
+export function recordSuccess(char: string, task: TaskType) {
+	if (task === 'mimic') {
+		// After mimic (intro or repeat), it enters/stays in active set
+		if (!activeSet.find((i) => i.char === char)) {
+			activeSet.push({ char, score: 0 });
+		}
+		// Remove from repeat pile if it was there
+		const repeatIdx = repeatPile.indexOf(char);
+		if (repeatIdx !== -1) {
+			repeatPile.splice(repeatIdx, 1);
+		}
+	} else {
+		// Passed a test (listen or recall)
+		const item = activeSet.find((i) => i.char === char);
+		if (item) {
+			item.score++;
+		}
 		
-		if (unlearned.length > 0) {
-			const newChar = unlearned.pop()!;
-			pool.push({ char: newChar, stage: 'learning', score: 0 });
-		} else if (pool.length === 0) {
-			// Restart curriculum if everything is learned in this session
-			unlearned = [...CURRICULUM].reverse();
-			for (let i = 0; i < INITIAL_POOL_SIZE && unlearned.length > 0; i++) {
-				const c = unlearned.pop()!;
-				pool.push({ char: c, stage: 'learning', score: 0 });
-			}
+		// Probability to introduce a new letter (30% chance if we have unlearned letters)
+		if (unlearned.length > 0 && Math.random() < 0.3) {
+			pendingNewLetter = true;
 		}
 	}
-
-	save();
 }
 
 export function recordFailure(char: string) {
-	const item = pool.find(i => i.char === char);
-	if (!item) return;
-	
-	item.stage = 'learning';
-	item.score = 0;
-	save();
+	// Failed a test or mimic. 
+	// Move to repeat pile for re-presentation soon.
+	if (!repeatPile.includes(char)) {
+		repeatPile.push(char);
+	}
+	// No new letter can be added after a failure
+	pendingNewLetter = false;
 }
 
-export function getNextChar(): string {
-	if (pool.length === 0) return CURRICULUM[0];
-
-	if (pool.length > 1 && lastChar) {
-		const available = pool.filter(i => i.char !== lastChar);
-		if (available.length > 0) {
-			const idx = Math.floor(Math.random() * available.length);
-			lastChar = available[idx].char;
-			return lastChar;
-		}
+export function getNextTask(): { char: string; task: TaskType } {
+	// 1. If we need to introduce a new letter
+	if (pendingNewLetter && unlearned.length > 0) {
+		pendingNewLetter = false;
+		const char = unlearned.shift()!;
+		lastChar = char;
+		return { char, task: 'mimic' };
 	}
 
-	const idx = Math.floor(Math.random() * pool.length);
-	lastChar = pool[idx].char;
-	return lastChar;
+	// 2. If there are letters in the repeat pile
+	if (repeatPile.length > 0) {
+		const char = repeatPile.shift()!;
+		lastChar = char;
+		return { char, task: 'mimic' };
+	}
+
+	// 3. If active set is empty but we have unlearned (shouldn't happen often due to pendingNewLetter=true at start)
+	if (activeSet.length === 0) {
+		const char = unlearned.shift()!;
+		lastChar = char;
+		return { char, task: 'mimic' };
+	}
+
+	// 4. Test a random letter from the active set
+	let eligible = activeSet;
+	if (activeSet.length > 1 && lastChar) {
+		eligible = activeSet.filter((i) => i.char !== lastChar);
+	}
+	const item = eligible[Math.floor(Math.random() * eligible.length)];
+	lastChar = item.char;
+
+	// Randomly choose between listen and recall
+	const task: TaskType = Math.random() < 0.5 ? 'listen' : 'recall';
+	return { char: item.char, task };
 }
 
-export function getPool() { return pool.map(i => i.char); }
-export function getItem(char: string) { return pool.find(i => i.char === char); }
-export function getScores() { 
-	const scores: Record<string, number> = {};
-	pool.forEach(i => scores[i.char] = i.score);
-	return scores;
+// Helper to check if a char is in "learning" mode (mimic)
+export function getItem(char: string) {
+	return activeSet.find((i) => i.char === char);
+}
+
+export function getPool() {
+	return activeSet.map((i) => i.char);
 }
