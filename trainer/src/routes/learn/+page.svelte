@@ -28,6 +28,8 @@
 	}
 
 	function shouldShowPattern() {
+		if (game.state === 'idle') return false;
+		
 		// Show pattern during Mimic (Learning)
 		if (game.taskType === 'mimic') return true;
 		
@@ -77,7 +79,7 @@
 
 <InputArea 
 	disabled={game.state === 'listening' && game.taskType === 'listen'} 
-	hint={game.state === 'idle' ? 'Tap anywhere or press Space' : ''} 
+	hint={null} 
 />
 
 	<style>

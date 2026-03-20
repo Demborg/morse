@@ -218,7 +218,7 @@ export class TrainGame {
 	get statusText() {
 		switch (this.state) {
 			case 'idle':
-				return 'Tap to start';
+				return 'Tap or Space to start';
 			case 'demo':
 				return 'Listen...';
 			case 'success':

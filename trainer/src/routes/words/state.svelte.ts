@@ -142,7 +142,7 @@ export class WordsGame {
 
 	get statusText() {
 		switch (this.state) {
-			case 'idle': return 'Tap to start';
+			case 'idle': return 'Tap or Space to start';
 			case 'listening': return 'Type the word';
 			case 'success': return 'Correct';
 			case 'retry': return 'Try again';

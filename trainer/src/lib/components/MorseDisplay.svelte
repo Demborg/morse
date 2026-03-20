@@ -28,7 +28,8 @@
 		{:else if char}
 			{char}
 		{:else}
-			·−
+			<div class="logo-title">MORSE</div>
+			.—
 		{/if}
 	</div>
 	<div class="pattern" style:visibility={showPattern ? 'visible' : 'hidden'}>
@@ -40,7 +41,7 @@
 				class:entered={i < userInput.length}
 				class:correct={i < userInput.length && userInput[i] === symbol}
 				class:wrong={i < userInput.length && userInput[i] !== symbol}
-			>{symbol === '.' ? '·' : '−'}</span>
+			>{symbol === '.' ? '.' : '—'}</span>
 		{/each}
 	</div>
 	<div class="status">{statusText}</div>
@@ -62,6 +63,17 @@
 		line-height: 1;
 		min-height: 5rem;
 		font-variant-numeric: tabular-nums;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.logo-title {
+		font-size: 0.8rem;
+		opacity: 0.2;
+		letter-spacing: 0.8em;
+		margin-bottom: 2rem;
+		margin-right: -0.8em;
 	}
 
 	.pattern {
@@ -69,6 +81,7 @@
 		gap: 0.75rem;
 		font-size: 2.5rem;
 		min-height: 3rem;
+		font-weight: 700;
 	}
 
 	.symbol {
