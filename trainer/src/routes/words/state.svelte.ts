@@ -1,5 +1,5 @@
 import { MORSE_ALPHABET, END_TIMEOUT_MS } from '$lib/morse';
-import { resume as resumeAudio, toneOn, toneOff } from '$lib/audio';
+import { resume as resumeAudio, toneOn, toneOff, vibrate } from '$lib/audio';
 import { classifyPress } from '$lib/classifier';
 import * as srs from '$lib/srs.svelte';
 import { shell } from '$lib/shell.svelte';
@@ -119,6 +119,7 @@ export class WordsGame {
 	handleWordSuccess() {
 		this.state = 'success';
 		shell.success = true;
+		vibrate([40, 40, 40]);
 
 		this.stateTimer = setTimeout(() => {
 			shell.success = false;
@@ -131,6 +132,7 @@ export class WordsGame {
 	handleRetry() {
 		this.state = 'retry';
 		shell.retry = true;
+		vibrate(200);
 
 		this.stateTimer = setTimeout(() => {
 			shell.retry = false;

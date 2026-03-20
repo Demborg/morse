@@ -1,5 +1,5 @@
 import { MORSE_ALPHABET, CURRICULUM, morseToTimeline, END_TIMEOUT_MS } from '$lib/morse';
-import { resume as resumeAudio, playTone, toneOn, toneOff } from '$lib/audio';
+import { resume as resumeAudio, playTone, toneOn, toneOff, vibrate } from '$lib/audio';
 import { classifyPress } from '$lib/classifier';
 import * as srs from '$lib/srs.svelte';
 import { shell } from '$lib/shell.svelte';
@@ -183,6 +183,7 @@ export class TrainGame {
 	handleSuccess() {
 		this.state = 'success';
 		shell.success = true;
+		vibrate([40, 40, 40]);
 
 		if (this.firstAttempt) {
 			srs.recordSuccess(this.char, this.taskType);
@@ -197,6 +198,7 @@ export class TrainGame {
 	handleRetry() {
 		this.state = 'retry';
 		shell.retry = true;
+		vibrate(200);
 
 		this.firstAttempt = false;
 		srs.recordFailure(this.char);

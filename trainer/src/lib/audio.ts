@@ -29,6 +29,12 @@ export async function resume(): Promise<void> {
 	if (c.state === 'suspended') await c.resume();
 }
 
+export function vibrate(pattern: number | number[]): void {
+	if (typeof navigator !== 'undefined' && navigator.vibrate) {
+		navigator.vibrate(pattern);
+	}
+}
+
 export function toneOn(): void {
 	const c = ensureContext();
 	if (!gain) return;
@@ -37,6 +43,8 @@ export function toneOn(): void {
 	gain.gain.cancelScheduledValues(now);
 	gain.gain.setValueAtTime(gain.gain.value, now);
 	gain.gain.linearRampToValueAtTime(1, now + RAMP_MS / 1000);
+
+	vibrate(2000);
 }
 
 export function toneOff(): void {
@@ -46,6 +54,8 @@ export function toneOff(): void {
 	gain.gain.cancelScheduledValues(now);
 	gain.gain.setValueAtTime(gain.gain.value, now);
 	gain.gain.linearRampToValueAtTime(0, now + RAMP_MS / 1000);
+
+	vibrate(0);
 }
 
 export function playTone(durationMs: number): Promise<void> {
