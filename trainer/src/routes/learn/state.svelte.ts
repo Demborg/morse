@@ -7,7 +7,6 @@ import { onMorsePress, onMorseRelease } from '$lib/input.svelte';
 
 export type TaskType = 'mimic' | 'recall' | 'listen';
 export type State = 'idle' | 'demo' | 'listening' | 'success' | 'retry';
-
 export class TrainGame {
 	state = $state<State>('idle');
 	taskType = $state<TaskType>('mimic');
