@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { triggerPress, triggerRelease } from '$lib/input.svelte';
-	
-	let { disabled = false, hint = 'Tap anywhere or press Space' } = $props();
-	
+
+	interface Props {
+		disabled?: boolean;
+		hint?: string | null;
+	}
+
+	let { disabled = false, hint = 'Tap anywhere or press Space' }: Props = $props();
+
 	let touchTarget: HTMLDivElement;
 
 	$effect(() => {
@@ -23,7 +28,7 @@
 <div
 	class="touch-target"
 	bind:this={touchTarget}
-	class:disabled={disabled}
+	class:disabled
 	onmousedown={triggerPress}
 	onmouseup={triggerRelease}
 >

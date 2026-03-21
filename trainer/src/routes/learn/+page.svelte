@@ -14,28 +14,28 @@
 	// Determine what to show on the display
 	function getDisplayChar() {
 		if (game.state === 'idle') return null;
-		
+
 		// If we are succeeding or retrying, always show the correct answer
 		if (game.state === 'success' || game.state === 'retry') return game.char;
-		
+
 		// Listen mode: hide character during playback and listening
 		if (game.taskType === 'listen') {
 			if (game.state === 'demo' || game.state === 'listening') return '?';
 		}
-		
+
 		// Mimic/Recall: show the character
 		return game.char;
 	}
 
 	function shouldShowPattern() {
 		if (game.state === 'idle') return false;
-		
+
 		// Show pattern during Mimic (Learning)
 		if (game.taskType === 'mimic') return true;
-		
+
 		// Show pattern during Retry (Correcting)
 		if (game.state === 'retry') return true;
-		
+
 		// Show pattern during Success (Feedback)
 		if (game.state === 'success') return true;
 
@@ -57,32 +57,25 @@
 		{#if game.state === 'listening'}
 			{#if game.taskType === 'listen'}
 				<div class="actions">
-					<button class="secondary-btn" onclick={() => game.replay()}>
-						Replay Pattern
-					</button>
+					<button class="secondary-btn" onclick={() => game.replay()}> Replay Pattern </button>
 				</div>
 				<div class="choices">
-					{#each game.choices as choice}
+					{#each game.choices as choice (choice)}
 						<button class="choice-btn" onclick={() => game.submitChoice(choice)}>{choice}</button>
 					{/each}
 				</div>
 			{:else if game.taskType === 'mimic'}
 				<div class="actions">
-					<button class="secondary-btn" onclick={() => game.replay()}>
-						Replay Demo
-					</button>
+					<button class="secondary-btn" onclick={() => game.replay()}> Replay Demo </button>
 				</div>
 			{/if}
 		{/if}
 	</div>
 </div>
 
-<InputArea 
-	disabled={game.state === 'listening' && game.taskType === 'listen'} 
-	hint={null} 
-/>
+<InputArea disabled={game.state === 'listening' && game.taskType === 'listen'} hint={null} />
 
-	<style>
+<style>
 	.train-container {
 		display: flex;
 		flex-direction: column;

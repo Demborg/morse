@@ -4,6 +4,7 @@ import { classifyPress } from '$lib/classifier';
 import * as srs from '$lib/srs.svelte';
 import { shell } from '$lib/shell.svelte';
 import { onMorsePress, onMorseRelease } from '$lib/input.svelte';
+import { SvelteSet } from 'svelte/reactivity';
 
 export type TaskType = 'mimic' | 'recall' | 'listen';
 export type State = 'idle' | 'demo' | 'listening' | 'success' | 'retry';
@@ -109,9 +110,9 @@ export class TrainGame {
 	}
 
 	generateChoices() {
-		const set = new Set<string>();
+		const set = new SvelteSet<string>();
 		set.add(this.char);
-		
+
 		// Try to fill from active set first
 		const pool = srs.getPool();
 		const shuffledPool = pool.sort(() => Math.random() - 0.5);
