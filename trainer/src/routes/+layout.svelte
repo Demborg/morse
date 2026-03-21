@@ -4,12 +4,14 @@
 	import { base } from '$app/paths';
 	import { handleKeyDown, handleKeyUp } from '$lib/input.svelte';
 	import { shell } from '$lib/shell.svelte';
-	
+
 	let { children } = $props();
 
 	function isActive(path: string) {
 		const fullPath = base + path;
-		return page.url.pathname === fullPath || (path === '/learn' && page.url.pathname === base + '/');
+		return (
+			page.url.pathname === fullPath || (path === '/learn' && page.url.pathname === base + '/')
+		);
 	}
 </script>
 

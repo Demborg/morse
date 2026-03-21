@@ -35,7 +35,7 @@ export class WordsGame {
 	}
 
 	unmount() {
-		this.cleanup.forEach(cb => cb());
+		this.cleanup.forEach((cb) => cb());
 		this.clearTimers();
 		toneOff();
 		shell.flash = false;
@@ -69,7 +69,7 @@ export class WordsGame {
 			return;
 		}
 		if (this.state !== 'listening') return;
-		
+
 		if (this.endTimer) clearTimeout(this.endTimer);
 		this.pressStart = performance.now();
 		shell.flash = true;
@@ -82,7 +82,7 @@ export class WordsGame {
 			toneOff();
 			return;
 		}
-		
+
 		const duration = performance.now() - this.pressStart;
 		this.pressStart = null;
 		shell.flash = false;
@@ -97,7 +97,7 @@ export class WordsGame {
 
 	evaluate() {
 		if (this.state !== 'listening') return;
-		
+
 		const input = this.userInput.join('');
 		if (input === this.expectedPattern) {
 			this.handleLetterSuccess();
@@ -144,11 +144,16 @@ export class WordsGame {
 
 	get statusText() {
 		switch (this.state) {
-			case 'idle': return 'Tap or Space to start';
-			case 'listening': return 'Type the word';
-			case 'success': return 'Correct';
-			case 'retry': return 'Try again';
-			default: return '';
+			case 'idle':
+				return 'Tap or Space to start';
+			case 'listening':
+				return 'Type the word';
+			case 'success':
+				return 'Correct';
+			case 'retry':
+				return 'Try again';
+			default:
+				return '';
 		}
 	}
 }

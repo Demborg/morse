@@ -7,14 +7,14 @@ let isPressed = $state(false);
 export function onMorsePress(cb: Callback) {
 	pressHandlers.push(cb);
 	return () => {
-		pressHandlers = pressHandlers.filter(h => h !== cb);
+		pressHandlers = pressHandlers.filter((h) => h !== cb);
 	};
 }
 
 export function onMorseRelease(cb: Callback) {
 	releaseHandlers.push(cb);
 	return () => {
-		releaseHandlers = releaseHandlers.filter(h => h !== cb);
+		releaseHandlers = releaseHandlers.filter((h) => h !== cb);
 	};
 }
 
@@ -26,7 +26,7 @@ export function triggerPress(e?: Event) {
 	if (e && e.cancelable) e.preventDefault();
 	if (!isPressed) {
 		isPressed = true;
-		pressHandlers.forEach(cb => cb());
+		pressHandlers.forEach((cb) => cb());
 	}
 }
 
@@ -34,7 +34,7 @@ export function triggerRelease(e?: Event) {
 	if (e && e.cancelable) e.preventDefault();
 	if (isPressed) {
 		isPressed = false;
-		releaseHandlers.forEach(cb => cb());
+		releaseHandlers.forEach((cb) => cb());
 	}
 }
 

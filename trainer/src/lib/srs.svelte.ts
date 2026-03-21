@@ -20,7 +20,7 @@ export function load() {
 	activeSet = [];
 	repeatPile = [];
 	lastChar = null;
-	
+
 	// Start by introducing the first letter
 	if (unlearned.length > 0) {
 		repeatPile.push(unlearned.shift()!);
@@ -45,7 +45,7 @@ export function recordSuccess(char: string, task: TaskType) {
 		if (item) {
 			item.score++;
 		}
-		
+
 		// Probability to introduce a new letter (30% chance if we have unlearned letters)
 		if (unlearned.length > 0 && Math.random() < 0.3) {
 			pendingNewLetter = true;
@@ -54,7 +54,7 @@ export function recordSuccess(char: string, task: TaskType) {
 }
 
 export function recordFailure(char: string) {
-	// Failed a test or mimic. 
+	// Failed a test or mimic.
 	// Move to repeat pile for re-presentation soon.
 	if (!repeatPile.includes(char)) {
 		repeatPile.push(char);
