@@ -33,3 +33,7 @@ jobs:
       - name: Type Check
         run: npm run check
         working-directory: trainer
+
+      - name: Test
+        run: npm run test
+        working-directory: trainer

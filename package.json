@@ -5,7 +5,8 @@
     "prepare": "husky",
     "lint:trainer": "npm run lint --prefix trainer",
     "format:trainer": "npm run format --prefix trainer",
-    "check:trainer": "npm run check --prefix trainer"
+    "check:trainer": "npm run check --prefix trainer",
+    "test:trainer": "npm run test --prefix trainer"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.57.1",
@@ -21,9 +22,10 @@
     "typescript-eslint": "^8.57.1"
   },
   "lint-staged": {
-    "trainer/**/*.{js,ts,svelte}": [
-      "npx eslint --fix --config trainer/eslint.config.js",
-      "npx prettier --write --config trainer/.prettierrc --ignore-path trainer/.prettierignore",
+    "trainer/**/*.{js,ts,svelte,ts}": [
+      "prettier --write --config trainer/.prettierrc --ignore-path trainer/.prettierignore",
+      "eslint --config trainer/eslint.config.js",
+      "vitest run --dir trainer",
       "npm run check --prefix trainer"
     ]
   }
