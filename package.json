@@ -30,7 +30,7 @@
       "concurrently --raw \"eslint --config trainer/eslint.config.js\" \"vitest run --dir trainer\" \"npm run check --prefix trainer\""
     ],
     "firmware/**/*.{cpp,h,ino}": [
-      "sh -c \"cd firmware && pio run\""
+      "sh -c \"cd firmware && pio run && pio check --skip-packages\""
     ]
   }
 }
