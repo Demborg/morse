@@ -1,0 +1,6 @@
+.pio
+.vscode
+.gcc-flags.json
+*.o
+*.bin
+*.elf
