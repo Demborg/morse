@@ -32,10 +32,19 @@ Trainer Mode: A raw passthrough mode that simply maps the physical key to a stan
 Handling Control Characters: Traditional Morse lacks Tab, Enter, and Backspace. The current roadmap includes experimenting with a hybrid UI approach (e.g., implementing a modern smartphone "Long Hold" state) versus using historical procedural signals (Prosigns).
 
 📱 Frontend Trainer (Svelte)
-A mobile-first, offline-capable PWA designed to train the ear-to-hand loop.
+A mobile-first web app designed to train the ear-to-hand loop.
 
-Mechanics: A "Simon Says" rhythm game. The app plays a 700Hz sine wave (via the Web Audio API) and flashes the screen. The user must mimic the rhythm to advance.
+- **Mechanics:** 
+    - **SRS (Spaced Repetition):** Intelligent learning loop that introduces characters from a curriculum and uses spaced repetition to ensure mastery.
+    - **Task Types:** Practice through `mimic` (listen and repeat), `listen` (multiple choice recognition), and `recall` (translating symbols from memory).
+    - **Word Mode:** Practice full words using characters already mastered in the learning curriculum.
 
-Input Agnostic: Listens to both native touch events (for practicing on the subway) and standard keyboard events (listening for the Spacebar so the physical Morse key can be used as the input device).
+- **Audio & Visuals:** Plays a 700Hz sine wave (via Web Audio API) and provides aggressive visual feedback (flashing the screen/touch target) for both inputs and demos.
 
-Mobile-First UX: Features a massive touch-target area and aggressive visual feedback to counter noisy environments.
+- **Input Agnostic:** Listens to both native touch events (for mobile practice) and standard keyboard events (listening for the Spacebar so the physical Morse key can be used as the input device).
+
+- **Timing (80ms unit):** 
+    - DIT: 1 unit (80ms)
+    - DAH: 3 units (240ms)
+    - DIT/DAH Threshold: 2 units (160ms)
+    - End-of-input Timeout: 6 units (480ms)

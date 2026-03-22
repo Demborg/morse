@@ -9,7 +9,7 @@ A Bluetooth keyboard built from a vintage Morse code key (ESP32-C3), paired with
 ## Repository Structure
 
 - `/firmware` - PlatformIO C++ codebase for ESP32-C3 (Arduino framework, ESP32-BLE-Keyboard library)
-- `/trainer` - Svelte-based mobile PWA for learning Morse
+- `/trainer` - Svelte-based mobile web app for learning Morse
 
 ## Firmware
 
@@ -23,8 +23,13 @@ A Bluetooth keyboard built from a vintage Morse code key (ESP32-C3), paired with
 - **Framework:** SvelteKit 5 with TypeScript, mobile-first
 - **Dev server:** `cd trainer && npm run dev`
 - **Build:** `cd trainer && npm run build`
-- **Audio:** 700Hz sine wave via Web Audio API (persistent oscillator toggled via GainNode)
-- **Input:** Listens to both touch events and keyboard Spacebar (for physical key input)
-- **Mechanic:** "Simon Says" rhythm game — app plays pattern, user mimics to advance
-- **Timing model:** 1 unit = 120ms. DIT = 1 unit, DAH = 3 units. DIT/DAH threshold = 2 units (240ms). End-of-input timeout = 6 units (720ms).
-- **Game state:** `idle → demo → listening → success/retry → demo` loop managed in `game.svelte.ts` using Svelte 5 runes (`$state`)
+- **Audio:** 700Hz sine wave via Web Audio API (persistent oscillator toggled via GainNode in `$lib/audio.ts`)
+- **Input:** Listens to both touch events and keyboard Spacebar via `$lib/input.svelte.ts`
+- **Mechanics:** 
+    - **SRS (Spaced Repetition System):** Managed in `$lib/srs.svelte.ts`. Introduces characters from a curriculum and tracks progress.
+    - **Task Types:** `mimic` (listen and repeat), `listen` (multiple choice), and `recall` (type from memory).
+    - **Modes:** 
+        - `Learn` (+page.svelte at `/learn`): Focuses on individual characters using SRS.
+        - `Words` (+page.svelte at `/words`): Practice with words formed from learned characters.
+- **Timing model:** 1 unit = 80ms. DIT = 1 unit, DAH = 3 units. DIT/DAH threshold = 2 units (160ms). End-of-input timeout = 6 units (480ms).
+- **Game state:** `idle → demo → listening → success/retry` loop managed in `state.svelte.ts` within route folders using Svelte 5 runes (`$state`).
