@@ -8,7 +8,7 @@
     "check:trainer": "npm run check --prefix trainer",
     "test:trainer": "npm run test --prefix trainer",
     "build:firmware": "cd firmware && pio run",
-    "lint:firmware": "cd firmware && pio check"
+    "lint:firmware": "cd firmware && pio check --skip-packages"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.57.1",
