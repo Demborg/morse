@@ -13,6 +13,25 @@ Having found an old Morse key I bought as a kid, I now clearly see the logical c
 - `/firmware`: The PlatformIO C++ codebase for the ESP32-C3.
 - `/trainer`: The Svelte-based mobile web application for learning Morse.
 
+## 🚀 Project Setup & Workflow
+
+To set up the development environment:
+
+1.  **Install Root Dependencies**: Run `npm install` in the root directory. This installs developer tools like Husky, Prettier, and ESLint.
+2.  **Husky Setup**: The `prepare` script automatically initializes Husky hooks.
+3.  **Pre-commit Hooks**: We use `lint-staged` via Husky. On every commit, the project automatically:
+    - Runs **Prettier** to ensure consistent formatting.
+    - Runs **ESLint** to catch code quality issues.
+    - Runs **Vitest** to verify changes.
+    - Runs **Svelte-check** to validate types and Svelte syntax.
+
+### Root Utility Scripts
+
+- `npm run lint:trainer`: Lint the trainer app.
+- `npm run format:trainer`: Format the trainer app code.
+- `npm run check:trainer`: Run Svelte-check on the trainer.
+- `npm run test:trainer`: Run Vitest for the trainer.
+
 ## 🛠️ Hardware
 
 - **Vintage Morse Key**: Any standard tactile telegraph key.

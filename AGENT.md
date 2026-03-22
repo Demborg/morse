@@ -18,6 +18,18 @@ A Bluetooth keyboard built from a vintage Morse code key (ESP32-C3), paired with
 - **Modes:** Typing mode (DIT/DAH state machine → keystrokes) and Trainer mode (key → Spacebar passthrough)
 - **Build/upload:** `cd firmware && pio run` / `pio run -t upload`
 
+## Project Setup & Workflow
+
+- **Setup:** Run `npm install` in the root to install dev dependencies and initialize Husky.
+- **Root Scripts:**
+    - `npm run lint:trainer`: Lint the trainer app.
+    - `npm run format:trainer`: Format the trainer app code.
+    - `npm run check:trainer`: Run Svelte-check on the trainer.
+    - `npm run test:trainer`: Run Vitest for the trainer.
+- **Pre-commit Hooks:** Managed by Husky and `lint-staged`. On commit, it automatically:
+    - Formats modified files in `trainer/`.
+    - Runs ESLint, Vitest, and Svelte-check on modified files to ensure quality.
+
 ## Trainer App
 
 - **Framework:** SvelteKit 5 with TypeScript, mobile-first
