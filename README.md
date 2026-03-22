@@ -32,6 +32,20 @@ To set up the development environment:
 - `npm run check:trainer`: Run Svelte-check on the trainer.
 - `npm run test:trainer`: Run Vitest for the trainer.
 
+## 🛠️ Engineering Standards
+
+We follow standards inspired by *Clean Code*, *Grokking Simplicity*, and *Extreme Programming*.
+
+### Code Style
+- **Self-Documenting Code**: Favor small, well-named functions over documentation comments. Code should be readable at each abstraction level without needing external explanations.
+- **Anti-pattern**: Avoid using comments as "headers" for code blocks inside functions. If you need a header, you probably need a new function.
+- **Functional Style**: Prefer functional programming and pure functions.
+- **Test-Driven**: Always add tests for pure functions to ensure reliability.
+
+### Git Workflow
+- **Atomic Commits**: Each commit should perform exactly one task.
+- **Commit Messages**: Avoid the word "and" in commit messages. If you need "and", your commit is likely too large and should be split.
+
 ## 🛠️ Hardware
 
 - **Vintage Morse Key**: Any standard tactile telegraph key.

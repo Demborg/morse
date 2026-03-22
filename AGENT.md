@@ -30,6 +30,17 @@ A Bluetooth keyboard built from a vintage Morse code key (ESP32-C3), paired with
     - Formats modified files in `trainer/`.
     - Runs ESLint, Vitest, and Svelte-check on modified files to ensure quality.
 
+## Code Style & Git Workflow
+
+Inspired by *Clean Code*, *Grokking Simplicity*, and *Extreme Programming*:
+
+- **Functional Preference:** Favor a functional programming style.
+- **Self-Documenting Code:** Small, well-named functions are strongly preferred over documentation comments. Code should be readable at each abstraction level.
+    - **Anti-pattern:** Using comments as "headers" for blocks of code within a function.
+- **Testing:** Always add tests for pure functions when they arise.
+- **Atomic Commits:** Each commit must do exactly one thing.
+    - **Anti-pattern:** Using the word "and" in commit messages (indicates a non-atomic commit).
+
 ## Trainer App
 
 - **Framework:** SvelteKit 5 with TypeScript, mobile-first
