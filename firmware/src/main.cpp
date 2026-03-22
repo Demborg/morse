@@ -9,8 +9,8 @@
 // Timing Constants (based on GEMINI.md and standard Morse)
 #define UNIT_MS 80
 #define DIT_MAX_MS (UNIT_MS * 2) // 160ms - threshold between dit and dah
-#define LETTER_TIMEOUT_MS (UNIT_MS * 3) // 240ms - end of character (standard 3 units)
-#define WORD_TIMEOUT_MS (UNIT_MS * 10) // 800ms - spacebar timeout (extended to 10 units for easier typing)
+#define LETTER_TIMEOUT_MS (UNIT_MS * 6) // 480ms - end of character (standard 3, but 6 is more relaxed)
+#define WORD_TIMEOUT_MS (UNIT_MS * 14) // 1120ms - spacebar timeout (extended to 14 units for easier typing)
 
 BleKeyboard bleKeyboard("Morse Key", "Morse Project", 100);
 
