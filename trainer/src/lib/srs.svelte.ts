@@ -1,4 +1,5 @@
-import { CURRICULUM } from './morse';
+import { CURRICULUM_LETTERS, CURRICULUM_NUMBERS } from './morse';
+import { settings } from './shell.svelte';
 
 export type TaskType = 'mimic' | 'recall' | 'listen';
 
@@ -14,9 +15,14 @@ let lastChar = $state<string | null>(null);
 let pendingNewLetter = $state(false);
 
 export function load() {
+	// Filter curriculum based on settings
+	const pool: string[] = [];
+	if (settings.trainLetters) pool.push(...CURRICULUM_LETTERS);
+	if (settings.trainNumbers) pool.push(...CURRICULUM_NUMBERS);
+
 	// Reset state for new session (no persistence)
 	// Randomize the order of the curriculum
-	unlearned = [...CURRICULUM].sort(() => Math.random() - 0.5);
+	unlearned = [...pool].sort(() => Math.random() - 0.5);
 	activeSet = [];
 	repeatPile = [];
 	lastChar = null;

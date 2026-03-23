@@ -1,9 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as srs from './srs.svelte';
 import { CURRICULUM } from './morse';
+import { settings } from './shell.svelte';
 
 describe('SRS Logic', () => {
 	beforeEach(() => {
+		// Ensure settings are standard for tests
+		settings.trainLetters = true;
+		settings.trainNumbers = true; // Include both to match CURRICULUM in tests
+
 		// Mock random to be deterministic where needed
 		// For curriculum shuffle, let's keep it stable
 		vi.spyOn(Math, 'random').mockReturnValue(0.1);

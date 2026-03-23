@@ -5,6 +5,9 @@ import svelteParser from 'svelte-eslint-parser';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
+	{
+		ignores: ['build/', '.svelte-kit/', 'dist/']
+	},
 	...ts.configs.recommended,
 	...svelte.configs['flat/recommended'],
 	{
@@ -26,8 +29,5 @@ export default [
 		rules: {
 			'svelte/no-navigation-without-resolve': 'off'
 		}
-	},
-	{
-		ignores: ['build/', '.svelte-kit/', 'dist/']
 	}
 ];

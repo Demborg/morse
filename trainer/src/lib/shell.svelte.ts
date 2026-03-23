@@ -3,3 +3,8 @@ export const shell = $state({
 	success: false,
 	retry: false
 });
+
+export const settings = $state({
+	trainLetters: true,
+	trainNumbers: false
+});

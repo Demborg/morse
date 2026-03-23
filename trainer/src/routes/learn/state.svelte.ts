@@ -1,8 +1,14 @@
-import { MORSE_ALPHABET, CURRICULUM, morseToTimeline, END_TIMEOUT_MS } from '$lib/morse';
+import {
+	MORSE_ALPHABET,
+	CURRICULUM_LETTERS,
+	CURRICULUM_NUMBERS,
+	morseToTimeline,
+	END_TIMEOUT_MS
+} from '$lib/morse';
 import { resume as resumeAudio, playTone, toneOn, toneOff, vibrate } from '$lib/audio';
 import { classifyPress } from '$lib/classifier';
 import * as srs from '$lib/srs.svelte';
-import { shell } from '$lib/shell.svelte';
+import { shell, settings } from '$lib/shell.svelte';
 import { onMorsePress, onMorseRelease } from '$lib/input.svelte';
 import { SvelteSet } from 'svelte/reactivity';
 
@@ -120,9 +126,13 @@ export class TrainGame {
 			if (set.size < 4) set.add(c);
 		}
 
-		// Then fill with random from curriculum
-		while (set.size < 4) {
-			const randomChar = CURRICULUM[Math.floor(Math.random() * CURRICULUM.length)];
+		// Then fill with random from enabled curriculum
+		const fullPool: string[] = [];
+		if (settings.trainLetters) fullPool.push(...CURRICULUM_LETTERS);
+		if (settings.trainNumbers) fullPool.push(...CURRICULUM_NUMBERS);
+
+		while (set.size < 4 && fullPool.length > 0) {
+			const randomChar = fullPool[Math.floor(Math.random() * fullPool.length)];
 			set.add(randomChar);
 		}
 		this.choices = Array.from(set).sort(() => Math.random() - 0.5);
