@@ -115,6 +115,11 @@ export class TrainGame {
 		this.playDemo();
 	}
 
+	dontKnow() {
+		if (this.state !== 'listening') return;
+		this.handleRetry();
+	}
+
 	generateChoices() {
 		const set = new SvelteSet<string>();
 		set.add(this.char);

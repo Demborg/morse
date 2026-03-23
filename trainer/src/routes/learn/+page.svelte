@@ -58,6 +58,7 @@
 			{#if game.taskType === 'listen'}
 				<div class="actions">
 					<button class="secondary-btn" onclick={() => game.replay()}> Replay Pattern </button>
+					<button class="secondary-btn" onclick={() => game.dontKnow()}> Don't Know </button>
 				</div>
 				<div class="choices">
 					{#each game.choices as choice (choice)}
@@ -67,6 +68,10 @@
 			{:else if game.taskType === 'mimic'}
 				<div class="actions">
 					<button class="secondary-btn" onclick={() => game.replay()}> Replay Demo </button>
+				</div>
+			{:else if game.taskType === 'recall'}
+				<div class="actions">
+					<button class="secondary-btn" onclick={() => game.dontKnow()}> Don't Know </button>
 				</div>
 			{/if}
 		{/if}
@@ -94,6 +99,7 @@
 	.actions {
 		display: flex;
 		justify-content: center;
+		gap: 1rem;
 		padding: 1rem;
 		pointer-events: auto;
 		position: relative;

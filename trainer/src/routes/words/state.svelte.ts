@@ -63,6 +63,11 @@ export class WordsGame {
 		this.clearTimers();
 	}
 
+	dontKnow() {
+		if (this.state !== 'listening') return;
+		this.handleRetry();
+	}
+
 	handlePressStart() {
 		if (this.state === 'idle') {
 			this.start();

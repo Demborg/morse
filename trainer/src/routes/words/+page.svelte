@@ -24,7 +24,11 @@
 	/>
 
 	<div class="game-ui">
-		<!-- Reserved space for symmetry with learn page -->
+		{#if game.state === 'listening'}
+			<div class="actions">
+				<button class="secondary-btn" onclick={() => game.dontKnow()}> Don't Know </button>
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -44,5 +48,31 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
+	}
+
+	.actions {
+		display: flex;
+		justify-content: center;
+		gap: 1rem;
+		padding: 1rem;
+		pointer-events: auto;
+		position: relative;
+		z-index: 10;
+	}
+
+	.secondary-btn {
+		background: transparent;
+		border: 1px solid #333;
+		color: #888;
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 0.9rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.secondary-btn:active {
+		background: #222;
 	}
 </style>
