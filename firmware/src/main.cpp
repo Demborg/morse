@@ -54,6 +54,7 @@ char translateMorse(const String& symbol) {
   return 0; // Return 0 if not found
 }
 
+// cppcheck-suppress unusedFunction
 void setup() {
   Serial.begin(115200);
   
@@ -81,6 +82,7 @@ void setup() {
   Serial.println("Setup complete. Waiting for BLE connection.");
 }
 
+// cppcheck-suppress unusedFunction
 void loop() {
   unsigned long now = millis();
   
